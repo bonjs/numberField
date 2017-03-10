@@ -1,0 +1,35 @@
+.numberField {
+	position: relative;
+}
+.numberField input {
+	border: 1px gray solid;
+	box-sizing:border-box;
+	padding-left: 26px;
+	padding-right: 26px;
+	height: 30px;
+}
+
+.numberField A:link{text-decoration:none;}
+.numberField A:visited{text-decoration:none;}
+.numberField A:active{text-decoration:none;}
+
+.numberField a {
+	border: 0px;
+	position: absolute;
+	width: 20px;
+	height: 30px;
+	line-height: 30px;
+	text-align: center;
+}
+.numberField a.minus {
+	border-right: 1px gray solid;
+	left: 0px;
+}
+
+.numberField a.plus {
+	border-left: 1px gray solid;
+	right: 0px;
+}
+.numberField .error {
+	border: 1px red solid;
+}
