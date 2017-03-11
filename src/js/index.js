@@ -12,7 +12,7 @@ $.fn.numberField = function() {
 	var tpl = [
 		'<span class="numberField">',
 			'<a class="minus" href="javascript:;">-</a>',
-			'<input value=0 style="width: 200px" />',
+			'<input style="width: 200px" />',
 			'<a class="plus" href="javascript:;">+</a>',
 		'</span>'
 	].join('');
@@ -27,17 +27,22 @@ $.fn.numberField = function() {
 	}
 	
 	var defaultConfig = {
-		maxValue: 10,
-		minValue: 1
+		maxValue: 1000,
+		minValue: 0,
+		value: 0
 	};
 	
 	return function(opt) {
 		var me = this;
 		
-		var config = $.extend(defaultConfig, opt);
+		var config = $.extend({}, defaultConfig, opt);
 		
 		// »° Ù–‘
 		me.each(function(i, dom) {
+			
+			var maxValue = typeof config.maxValue == 'function' ? config.maxValue.call(dom) : config.maxValue;
+			var minValue = typeof config.minValue == 'function' ? config.minValue.call(dom) : config.minValue;
+			
 			var el = $(tpl);
 			$(dom).after(el);
 			
@@ -45,16 +50,22 @@ $.fn.numberField = function() {
 			var input 	= el.find('input');
 			var plus 	= el.find('a.plus');
 			
+			input.val(config.value);
+			input.attr('style', config.style);
+			
 			var attrs = dom.attributes;
 			
 			Array.prototype.forEach.call(attrs, function(a) {
-				if(a.nodeName != 'type' || a.nodeValue != 'number') {
+				if(a.nodeName == 'value') {
+					input.val(a.nodeValue);
+				} else if(a.nodeName != 'type' || a.nodeValue != 'number') {
 					input.attr(a.nodeName, a.nodeValue);
 				}
 			});
 			
 			el.find('a').click(function() {
-				if(input[0].value <= config.maxValue && input[0].value >= config.minValue) {
+				if(parseFloat(input[0].value) <= parseFloat(maxValue) 
+					&& parseFloat(input[0].value) >= parseFloat(minValue)) {
 					el.find('a.plus,a.minus').css({
 						cursor:'pointer',
 						backgroundColor: ''
@@ -63,39 +74,36 @@ $.fn.numberField = function() {
 			});
 			
 			minus.click(function() {
-				if(input[0].value <= config.minValue) {
-					input[0].value = config.minValue;
+				if(parseFloat(input[0].value) <= parseFloat(minValue)) {
+					//input[0].value = config.minValue;
 					$(this).css({
 						cursor:'not-allowed',
 						backgroundColor: '#d2cdcd'
 					});
 				} else {
-					input[0].value = parseInt(input[0].value || 0) - 1;
+					input[0].value = parseFloat(input[0].value || 0) - 1;
 				}
+				me.trigger('minus');
 			});
 			plus.click(function() {
-				if(input[0].value >= config.maxValue) {
-					input[0].value = config.maxValue;
+				if(parseFloat(input[0].value) >= parseFloat(maxValue)) {
+					//input[0].value = config.maxValue;
 					$(this).css({
 						cursor:'not-allowed',
 						backgroundColor: '#d2cdcd'
 					});
 				} else {
-					input[0].value = parseInt(input[0].value || 0) + 1;
+					input[0].value = parseFloat(input[0].value || 0) + 1;
 				}
+				
+				me.trigger('minus');
 			});
 			
-			$(dom).remove();
+			$(dom).removeAttr('name').removeAttr('id').removeAttr('class').hide();
 			
-			if(isIE8) {
-				$(input).on({
-					change: inputFn,
-					keyup: inputFn
-				});
-			} else {
-				$(input).on('input', inputFn);
-			}
+			$(input).on(isIE8 ? 'change keyup' : 'input', function() {
+				me.trigger('update', this.value);
+			});
 		});
-		
-	}
+	};
 }();

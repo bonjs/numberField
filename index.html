@@ -9,16 +9,32 @@
 </head>
 <body>
 
-<div id=test value=10></div>
+<div class=test t=6 value=10></div>
+<div class=test t=3 value=10></div>
 
 
 <script src="./src/jquery.js"></script>
 <script src="./src/js/index.js"></script>
 <script>
 
-	$('#test').numberField({
-		maxValue: 5
+
+	$('.test').on('update', function() {
+		console.log('update');
 	});
+	
+	$('.test').numberField({
+		style: 'width: 300px',
+		maxValue: function() {
+			console.log($(this).attr('t'));
+			return $(this).attr('t');
+		}
+	});
+	
+	
+	
+	
+	
+	
 	
 </script>
 </body>
