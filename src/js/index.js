@@ -83,7 +83,7 @@ $.fn.numberField = function() {
 				} else {
 					input[0].value = parseFloat(input[0].value || 0) - 1;
 				}
-				me.trigger('minus');
+				$(dom).trigger('minus', input[0], input[0].value);
 			});
 			plus.click(function() {
 				if(parseFloat(input[0].value) >= parseFloat(maxValue)) {
@@ -95,14 +95,17 @@ $.fn.numberField = function() {
 				} else {
 					input[0].value = parseFloat(input[0].value || 0) + 1;
 				}
-				
-				me.trigger('minus');
+				$(dom).trigger('plus', input[0], input[0].value);
+			});
+			
+			$(dom).on('minus plus', function() {
+				$(dom).trigger('update', input[0], input[0].value);
 			});
 			
 			$(dom).removeAttr('name').removeAttr('id').removeAttr('class').hide();
 			
 			$(input).on(isIE8 ? 'change keyup' : 'input', function() {
-				me.trigger('update', this.value);
+				$(dom).trigger('update', this, this.value);
 			});
 		});
 	};
