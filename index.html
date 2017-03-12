@@ -9,8 +9,8 @@
 </head>
 <body>
 
-<div class=test t=6 value=10></div>
-<div class=test t=3 value=10></div>
+<input class=test t=6 value=10></input>
+<input class=test t=3 value=10></input>
 
 
 <script src="./src/jquery.js"></script>
@@ -24,6 +24,7 @@
 	
 	$('.test').numberField({
 		style: 'width: 300px',
+		minValue: 1,
 		maxValue: function() {
 			console.log($(this).attr('t'));
 			return $(this).attr('t');

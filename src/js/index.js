@@ -1,4 +1,11 @@
-
+/**
+ * author: spq
+ * date: 二○一七年三月十二日
+ */
+/**
+ * author: spq
+ * date: 二○一七年三月十二日
+ */
 $.fn.numberField = function() {
 
 	var isIE8 = !!window && /msie 8\.0/i.test(window.navigator.userAgent.toLowerCase());
@@ -12,7 +19,6 @@ $.fn.numberField = function() {
 	var tpl = [
 		'<span class="numberField">',
 			'<a class="minus" href="javascript:;">-</a>',
-			'<input style="width: 200px" />',
 			'<a class="plus" href="javascript:;">+</a>',
 		'</span>'
 	].join('');
@@ -38,34 +44,39 @@ $.fn.numberField = function() {
 		var config = $.extend({}, defaultConfig, opt);
 		
 		// 取属性
-		me.each(function(i, dom) {
+		me.each(function(i, inputField) {
 			
-			var maxValue = typeof config.maxValue == 'function' ? config.maxValue.call(dom) : config.maxValue;
-			var minValue = typeof config.minValue == 'function' ? config.minValue.call(dom) : config.minValue;
+			var input = $(inputField);
+			
+			var maxValue = function() {
+				if(input.attr('maxValue')) {
+					return input.attr('maxValue');
+				} else {
+					return typeof config.maxValue == 'function' ? config.maxValue.call(input) : config.maxValue;
+				}
+			}();
+			var minValue = function() {
+				if(input.attr('minValue')) {
+					return input.attr('minValue');
+				} else {
+					return typeof config.minValue == 'function' ? config.minValue.call(input) : config.minValue;
+				}
+			}();
 			
 			var el = $(tpl);
-			$(dom).after(el);
+			input.after(el);
 			
 			var minus 	= el.find('a.minus');
-			var input 	= el.find('input');
+			minus.after(input);
+			
 			var plus 	= el.find('a.plus');
 			
-			input.val(config.value);
+			input.val(input.val() || config.value);
 			input.attr('style', config.style);
 			
-			var attrs = dom.attributes;
-			
-			Array.prototype.forEach.call(attrs, function(a) {
-				if(a.nodeName == 'value') {
-					input.val(a.nodeValue);
-				} else if(a.nodeName != 'type' || a.nodeValue != 'number') {
-					input.attr(a.nodeName, a.nodeValue);
-				}
-			});
-			
 			el.find('a').click(function() {
-				if(parseFloat(input[0].value) <= parseFloat(maxValue) 
-					&& parseFloat(input[0].value) >= parseFloat(minValue)) {
+				if(parseFloat(input.val()) <= parseFloat(maxValue) 
+					&& parseFloat(input.val()) >= parseFloat(minValue)) {
 					el.find('a.plus,a.minus').css({
 						cursor:'pointer',
 						backgroundColor: ''
@@ -74,38 +85,42 @@ $.fn.numberField = function() {
 			});
 			
 			minus.click(function() {
-				if(parseFloat(input[0].value) <= parseFloat(minValue)) {
+				if(parseFloat(input.val()) > parseFloat(minValue)) {
+					input.val(parseFloat(input.val() || 0) - 1);
+				}
+				
+				if(parseFloat(input.val()) <= parseFloat(minValue)) {
 					//input[0].value = config.minValue;
 					$(this).css({
 						cursor:'not-allowed',
 						backgroundColor: '#d2cdcd'
 					});
-				} else {
-					input[0].value = parseFloat(input[0].value || 0) - 1;
 				}
-				$(dom).trigger('minus', input[0], input[0].value);
+				input.trigger('minus', input, input.val());
 			});
 			plus.click(function() {
-				if(parseFloat(input[0].value) >= parseFloat(maxValue)) {
+				
+				if(parseFloat(input.val()) < parseFloat(maxValue)) {
+					input.val(parseFloat(input.val() || 0) + 1);
+				}
+				
+				if(parseFloat(input.val()) >= parseFloat(maxValue)) {
 					//input[0].value = config.maxValue;
 					$(this).css({
 						cursor:'not-allowed',
 						backgroundColor: '#d2cdcd'
 					});
-				} else {
-					input[0].value = parseFloat(input[0].value || 0) + 1;
 				}
-				$(dom).trigger('plus', input[0], input[0].value);
+				input.trigger('plus', input, input.val());
 			});
 			
-			$(dom).on('minus plus', function() {
-				$(dom).trigger('update', input[0], input[0].value);
+			input.on('minus plus', function() {
+				$(this).trigger('update', this, this.value);
 			});
 			
-			$(dom).removeAttr('name').removeAttr('id').removeAttr('class').hide();
-			
-			$(input).on(isIE8 ? 'change keyup' : 'input', function() {
-				$(dom).trigger('update', this, this.value);
+			input.on(isIE8 ? 'change keyup' : 'input', function() {
+				inputFn.call(this);
+				$(this).trigger('update', this, this.value);
 			});
 		});
 	};
